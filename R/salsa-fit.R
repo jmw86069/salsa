@@ -423,7 +423,7 @@ get_lower_bound <- function
       ( coef_fr_wei["wei_scale"] / coef_fr_wei["fr_scale"] ) ^
       ( coef_fr_wei["fr_weight"] /
             ( coef_fr_wei["fr_shape"] * coef_fr_wei["wei_shape"] ) );
-   return(lower_bound);
+   return(unname(lower_bound));
 }
 
 #' Calculate upper bound from Frechet fit
@@ -458,7 +458,7 @@ get_upper_bound <- function
 }
 
 
-fit_weibull <- function
+fit_weibull_test <- function
 (x)
 {
    xbar <- mean(x)
@@ -471,7 +471,7 @@ fit_weibull <- function
    return(c(ahat,bhat))
 }
 
-fitdist_weibull <- function
+fitdist_weibull_test <- function
 (x)
 {
    fitdistrplus::fitdist(x,
@@ -479,71 +479,89 @@ fitdist_weibull <- function
       method="mle");
 }
 
-#' Plot Frechet-Weibull fit
+#' Get step parameters for SALSA
 #'
-#' Plot Frechet-Weibull fit
+#' Get step parameters for SALSA
+#'
+#' This function takes a vector of counts and determines the
+#' appropriate step size to use when iterating the count
+#' threshold used by SALSA.
+#'
+#' @param x numeric vector of counts
+#' @param ... additional arguments are ignored
+#'
+#' @examples
+#' library(salsa);
+#' data(oz2_numi_per_cell);
+#'
+#' usecounts <- sort(oz2_numi_per_cell$count);
+#' get_salsa_steps(usecounts);
+#'
+#' # optionally return the vector of thresholds to use
+#' get_salsa_steps(usecounts, include_vector=TRUE);
 #'
 #' @export
-plot_fr_wei <- function
-(fit,
- addx=NULL,
- ylim=NULL,
- xlim=NULL,
- scale=FALSE,
- log="x",
- type=c("gg", "base"),
+get_salsa_steps <- function
+(x,
+ include_vector=FALSE,
  ...)
 {
-   ## Simple function to plot the Frechet-Weibull fit
-   type <- match.arg(type);
-   coef_fr_wei <- coef(fit);
-   x <- unique(sort(c(addx, fit$data)));
-   y1 <- dinvweibull(x=x,
-      scale=coef_fr_wei["fr_scale"],
-      shape=coef_fr_wei["fr_shape"],
-      log=FALSE);
-   y2 <- dweibull(x=x,
-      scale=coef_fr_wei["wei_scale"],
-      shape=coef_fr_wei["wei_shape"],
-      log=FALSE);
-   y12 <- y1 * coef_fr_wei["fr_weight"] +
-      y2 * (1 - coef_fr_wei["fr_weight"]);
-   if (scale) {
-      y1 <- y1 / max(y1);
-      y2 <- y2 / max(y2);
-      y12 <- y12 / max(y12);
+   #
+   minUMI <- min(x, na.rm=TRUE);
+   maxUMI <- max(x, na.rm=TRUE);
+   n_start <- max(c(floor(sqrt(minUMI)), 1));
+   n_bound <- floor(sqrt(maxUMI));
+   step_size <- ceiling( log10 ( n_bound ) );
+   step_size;
+   ret_vals <- list(n_start=n_start,
+      step_size=step_size,
+      n_bound=n_bound);
+   if (include_vector) {
+      n_vector <- seq(from=n_start,
+         to=n_bound,
+         by=step_size);
+      count_vector <- (n_vector^2) - 1;
+      ret_vals$n_vector <- n_vector;
+      ret_vals$count_vector <- count_vector;
    }
-   if (length(ylim) == 0) {
-      ylim <- range(c(0, y1, y2, y12));
-   }
-   if (length(xlim) == 0) {
-      xlim <- range(c(x, addx));
-   }
-   if (jamba::igrepHas("base", type)) {
-      plot(x=x, y=y1, col="red", type="l",
-         ylim=ylim,
-         xlim=xlim,
-         ...);
-      lines(x=x, y=y2, col="blue", type="l");
-      lines(x=x, y=y12, col="purple", type="l", lty="dotted", lwd=2);
-   }
-   yL <- list(y1=y1, y2=y2, y12=y12);
-   df <- data.frame(x=rep(x, 3),
-      y=unlist(yL),
-      dist=rep(c("Frechet", "Weibull", "Frechet-Weibull"),
-         lengths(yL))
-   )
-   if (jamba::igrepHas("gg", type)) {
-      gg <- ggplot(df, aes(x=x, y=y, group=dist, color=dist, linetype=dist)) +
-         geom_line(size=1) +
-         colorjam::theme_jam() + colorjam::scale_color_jam() +
-         #xlim(xlim) +
-         ylim(ylim) +
-         geom_vline(xintercept=coef_fr_wei[c("fr_scale", "wei_scale")]);
-      if ("x" %in% log) {
-         gg <- gg + scale_x_log10();
+   return(ret_vals);
+}
+
+#' Perform SALSA steps for threshold detection
+#'
+#' Perform SALSA steps for threshold detection
+#'
+#' @export
+do_salsa_steps <- function
+(x,
+ n_vector=NULL,
+ n_start=NULL,
+ n_bound=NULL,
+ step_size=NULL,
+ ...)
+{
+   #
+   if (length(n_vector) == 0) {
+      if (length(n_start) == 0 ||
+            length(n_bound) == 0 ||
+            length(step_size) == 0) {
+         step_list <- get_salsa_steps(x, include_vector=TRUE);
       }
-      return(gg);
+      if (length(n_start) == 0) {
+         n_start <- step_list$n_start;
+      }
+      if (length(n_bound) == 0) {
+         n_bound <- step_list$n_bound;
+      }
+      if (length(step_size) == 0) {
+         step_size <- step_list$step_size;
+      }
+      n_vector <- seq(from=n_start,
+         to=n_bound,
+         by=step_size);
    }
-   invisible(df);
+   n_vector;
+   ## Iterate each n_vector value:
+   ## - use memoise(fitdist_fr_wei()) to cache Frechet-Weibull fit results
+   ## - use memoise(fitdist_fr()) to cache Frechet fit results
 }

@@ -4,11 +4,21 @@
 \alias{rank_count_plot}
 \title{Rank-Count plot}
 \usage{
-rank_count_plot(x, UMIname = "UMIname", log = c("x", "y"),
-  flip_axes = FALSE, highlight_range = NULL, ...)
+rank_count_plot(x, log = c("x", "y"), flip_axes = FALSE,
+  highlight_range = NULL, ...)
 }
 \arguments{
 \item{x}{numeric or integer vector of counts}
+
+\item{log}{character vector indicating the axis or axes
+log-transform, with any presence of \code{"x"} and \code{"y"}.}
+
+\item{flip_axes}{logical indicating whether to flip the
+x- and y-axis coordinates.}
+
+\item{highlight_range}{optional numeric range to highlight,
+intended to represent the range of counts selected for
+downstream analysis.}
 
 \item{...}{additional arguments are ignored}
 }
@@ -19,4 +29,22 @@ Rank-Count plot
 This function creates a classic "knee plot" showing
 \code{"Rank"} on the x-axis, and \code{"Count"} on the y-axis,
 typically with log-scaled x- and y-axes.
+}
+\examples{
+library(salsa);
+data(oz2_numi_per_cell);
+
+usecounts <- sort(oz2_numi_per_cell$count);
+
+rank_count_plot(usecounts,
+   highlight_range=c(100,2500)) +
+   ggtitle("All counts unfiltered");
+
+# after filtering, it may help add y=1 to the axis range
+usecounts <- usecounts[usecounts >= 16];
+rank_count_plot(usecounts,
+   highlight_range=c(100,2500)) +
+   expand_limits(y=c(1,NA)) +
+   ggtitle("Filtered for counts >= 16");
+
 }
