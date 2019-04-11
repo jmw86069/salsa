@@ -1,15 +1,4 @@
 
-#' Fit Frechet-Weibull distributions
-#'
-#' Fit Frechet-Weibull distributions
-#'
-#' @export
-fit_fr_wei <- function
-(...)
-{
-   ## Purpose is to fit the five-parameter distribution
-   ## combining Weibull and Frechet distributions.
-}
 
 #' The Frechet-Weibull Distribution
 #'
@@ -20,6 +9,8 @@ fit_fr_wei <- function
 #' distribution with five parameters: `fr_shape`, `fr_scale`,
 #' `wei_shape`, `wei_scale`, and `fr_weight`.
 #'
+#' @family SALSA distribution fit functions
+#'
 #' @param x vector of quantiles
 #' @param fr_shape the Frechet shape
 #' @param fr_scale the Frechet scale
@@ -29,8 +20,6 @@ fit_fr_wei <- function
 #'    the corresponding Weibull weight is `(1 - fr_weight)`.
 #' @param log logical passed to `actuar::dinvweibull`, if `TRUE`
 #'    probabilities/densities are returned as `log(p)`.
-#' @param verbose logical indicating whether to print verbose output.
-#' @param ... additional arguments are ignored.
 #'
 #' @export
 dfr_wei <- function
@@ -40,9 +29,7 @@ dfr_wei <- function
  wei_shape=2,
  wei_scale=1000,
  fr_weight=0.5,
- log=FALSE,
- verbose=FALSE,
- ...)
+ log=FALSE)
 {
    ## Purpose is to model two distributions given proper parameters
    ##
@@ -68,6 +55,7 @@ dfr_wei <- function
    }
    fr_weight <- jamba::noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
+   verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
    if (verbose) {
       printDebug("d_fr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
@@ -104,15 +92,14 @@ fr_scale=100,
 wei_shape=2,
 wei_scale=1000,
 fr_weight=0.5,
-log=FALSE,
-verbose=FALSE,
-...)
+log=FALSE)
 {
    if (!suppressPackageStartupMessages(require(actuar))) {
       stop("The actuar package is required.");
    }
    fr_weight <- jamba::noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
+   verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
    if (verbose) {
       printDebug("q_fr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
@@ -149,15 +136,14 @@ fr_scale=100,
 wei_shape=2,
 wei_scale=1000,
 fr_weight=0.5,
-log=FALSE,
-verbose=FALSE,
-...)
+log=FALSE)
 {
    if (!suppressPackageStartupMessages(require(actuar))) {
       stop("The actuar package is required.");
    }
    fr_weight <- noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
+   verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
    if (verbose) {
       printDebug("q_fr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
@@ -188,11 +174,11 @@ verbose=FALSE,
 #'
 #' Parameter bounds for Frechet-Weibull fit
 #'
-#' This function defines a data.frame of parameter bounds,
-#' restricting the range of values allowed during the
-#' Frechet-Weibull distribution fit. Each of the five
-#' parameters are given `start`, `lower`, and `upper`
-#' values:
+#' This function defines a `matrix` with default
+#' parameter bounds to restrict the range of values
+#' allowed during the Frechet-Weibull distribution fit.
+#' Each of the five  parameters are given `start`,
+#' `lower`, and `upper` values:
 #'
 #' * `fr_weight` the weight of Frechet relative to Weibull,
 #'    on a scale of 0 to 1.
@@ -201,11 +187,33 @@ verbose=FALSE,
 #' * `wei_shape` the shape value for the Weibull distribution
 #' * `wei_scale` the scale value for the Weibull distribution
 #'
-#' @param param_fr_wei `data.frame` containing colnames
-#'    `"fr_shape"`, `"fr_scale"`, `"wei_shape"`, `"wei_scale"`,
-#'    and `"fr_weight"`, and rownames `"start"`, `"lower"`,
-#'    `"upper"`.
+#' The output `matrix` can be modified then passed to
+#' `do_salsa_steps()` in order to customize the model fit.
+#'
+#' @return `matrix` of five parameter upper, lower, and start
+#'    values to be used by `fitdist_fr_wei()`.
+#'
+#' @family SALSA distribution fit functions
+#'
+#' @param param_fr_wei `data.frame` containing one or more
+#'    colnames `"fr_shape"`, `"fr_scale"`, `"wei_shape"`,
+#'    `"wei_scale"`, `"fr_weight"`, and one or more rownames
+#'    `"start"`, `"lower"`, `"upper"`. Any non-NA values
+#'    replace the corresponding default values.
 #' @param ... additional arguments are ignored.
+#'
+#' @examples
+#' # default matrix of parameters
+#' param_fr_wei <- params_fr_wei();
+#' param_fr_wei;
+#'
+#' # modify some values
+#' custom_param_fr_wei_m <- rbind(
+#'    start=c(fr_shape=50, wei_shape=40),
+#'    lower=c(fr_shape=NA, wei_shape=400));
+#' custom_param_fr_wei_m;
+#' custom_param_fr_wei <- params_fr_wei(custom_param_fr_wei_m);
+#' custom_param_fr_wei;
 #'
 #' @export
 params_fr_wei <- function
@@ -233,15 +241,19 @@ params_fr_wei <- function
       lower=lowerFrWei,
       upper=upperFrWei);
    if (length(param_fr_wei) > 0) {
-      colx <- c("fr_weight","fr_shape", "fr_scale", "wei_shape", "wei_scale");
-      rowx <- c("start", "lower", "upper");
-      param_fr_wei <- param_fr_wei[rowx,colx];
-      if (any(!is.na(param_fr_wei))) {
-         param_fr_wei1[!is.na(param_fr_wei)] <- param_fr_wei[!is.na(param_fr_wei)];
+      # replace any non-NA entries from supplied colnames and rownames
+      colv <- intersect(colnames(param_fr_wei1), colnames(param_fr_wei));
+      rowv <- intersect(rownames(param_fr_wei1), rownames(param_fr_wei));
+      if (length(colv) > 0 && length(rowv) > 0) {
+         for (coli in colv) {
+            non_na <- !is.na(param_fr_wei[rowv,colv]);
+            if (any(non_na)) {
+               param_fr_wei1[rowv,colv][non_na] <- param_fr_wei[non_na];
+            }
+         }
       }
    }
-   param_fr_wei <- param_fr_wei1;
-   return(param_fr_wei);
+   return(param_fr_wei1);
 }
 
 #' Fit Frechet-Weibull distribution to non-censored data
@@ -256,8 +268,17 @@ params_fr_wei <- function
 #' which then calls `stats::optim()`. Arguments are
 #' passed to these functions using `...` where applicable.
 #'
+#' TODO: This function currently expects to use `method="mle"`
+#' which utilizes the upper,lower,start parameters for each
+#' of the five parameters. Other methods may have different
+#' requirements which are not formally handled. In future
+#' we will evaluate and support additional methods, modifying
+#' the call to `fitdistrplus::fitdist()` as needed.
+#'
 #' @return object of class `"fitdist"` described in
 #'     `fitdistrplus::fitdist()`.
+#'
+#' @family SALSA distribution fit functions
 #'
 #' @param x numeric vector
 #' @param param_fr_wei `data.frame` of parameter bounds, output
@@ -273,10 +294,18 @@ params_fr_wei <- function
 #' @param ... additional arguments are passed to
 #'    `fitdistrplus::fitdist()`.
 #'
+#' @examples
+#' library(salsa);
+#' data(oz2_numi_per_cell);
+#' x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+#' fit_fr_wei <- fitdist_fr_wei(x);
+#' # print coefficients
+#' print(coef(fit_fr_wei));
+#'
 #' @export
 fitdist_fr_wei <- function
 (x,
- param_fr_wei,
+ param_fr_wei=params_fr_wei(),
  method="mle",
  optim.method="Nelder-Mead",
  log=FALSE,
@@ -285,23 +314,32 @@ fitdist_fr_wei <- function
 {
    ## Purpose is to provide a simple wrapper for fitdist()
    if (verbose) {
-      printDebug("fitdist_fr_wei(): ",
+      jamba::printDebug("fitdist_fr_wei(): ",
          "method:", method);
-      printDebug("fitdist_fr_wei(): ",
+      jamba::printDebug("fitdist_fr_wei(): ",
          "optim.method:", optim.method);
-      printDebug("fitdist_fr_wei(): ",
+      jamba::printDebug("fitdist_fr_wei(): ",
          "param_fr_wei:");
       print(param_fr_wei);
    }
-   fit_fr_wei <- fitdistrplus::fitdist(
-      data=x,
-      distr="fr_wei",
-      method=method,
-      start=as.list(param_fr_wei["start",]),
-      lower=param_fr_wei["lower",],
-      upper=param_fr_wei["upper",],
-      optim.method=optim.method,
-      ...);
+   fit_fr_wei <- tryCatch({
+      fitdistrplus::fitdist(
+         data=x,
+         distr="fr_wei",
+         method=method,
+         start=as.list(param_fr_wei["start",]),
+         lower=param_fr_wei["lower",],
+         upper=param_fr_wei["upper",],
+         optim.method=optim.method,
+         ...);
+   }, error=function(e){
+      if (verbose) {
+         jamba::printDebug("fitdist_fr_wei(): ",
+            "Error:");
+         print(e);
+      }
+      NULL;
+   });
    return(fit_fr_wei);
 }
 
@@ -321,6 +359,8 @@ fitdist_fr_wei <- function
 #'     `fitdistrplus::fitdist()`. If any error occurs during
 #'     the fit, a `NULL` is returned.
 #'
+#' @family SALSA distribution fit functions
+#'
 #' @param x numeric vector
 #' @param param_fr_wei `data.frame` of parameter bounds, output
 #'    from `params_fr_wei()`, which defines the start, upper, and
@@ -331,16 +371,18 @@ fitdist_fr_wei <- function
 #' @param min_shape numeric value restricting the minimum shape
 #'    otherwise output is set to `NULL`.
 #' @param order,central,absolute,na.rm arguments passed to
-#'    `moments::moment()`.
+#'    `moments::moment()`. These values do not typically need to
+#'    be customized.
 #' @param verbose logical indicating whether to print verbose output.
 #' @param ... additional arguments are passed to
 #'    `fitdistrplus::fitdist()`.
 #'
 #' @examples
 #' data(oz2_numi_per_cell);
-#' usecounts <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
-#' fit_fr <- fitdist_fr(x=usecounts);
-#' coef(fit_fr);
+#' x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+#' fit_fr <- fitdist_fr(x);
+#' # print coefficients
+#' print(coef(fit_fr));
 #'
 #' @export
 fitdist_fr <- function
@@ -378,8 +420,11 @@ fitdist_fr <- function
          order=order,
          memp=memp2);
    }, error=function(e) {
-      printDebug("Error:");
-      print(e);
+      if (verbose) {
+         printDebug("fitdist_fr(): ",
+            "Error:");
+         print(e);
+      }
       NULL;
    });
    if (length(fit_fr) > 0 &&
@@ -395,6 +440,20 @@ fitdist_fr <- function
 #' Calculate lower bound from Frechet-Weibull fit
 #'
 #' Calculate lower bound from Frechet-Weibull fit
+#'
+#' This function takes the output from `fitdist_fr_wei()` and
+#' calculates the associated predicted lower bound for
+#' number of UMI to accept for downstream analysis of
+#' scRNA-seq data.
+#'
+#' The equation:
+#'
+#' fr_scale * (wei_scale / fr_scale) ^ (fr_weight / (fr_shape * wei_shape))
+#'
+#' @family SALSA support functions
+#'
+#' @return numeric value representing the lowest number of UMI to
+#' accept for downstream analysis of scRNA-seq data.
 #'
 #' @param fit_fr_wei `fitdist` object output from `fitdist_fr_wei()`,
 #'    or numeric vector with names `"fr_weight"`, `"fr_shape"`,
@@ -430,6 +489,20 @@ get_lower_bound <- function
 #'
 #' Calculate upper bound from Frechet fit
 #'
+#' This function takes the output from `fitdist_fr()` and
+#' calculates the associated predicted upper bound for
+#' number of UMI to accept for downstream analysis of
+#' scRNA-seq data.
+#'
+#' The equation:
+#'
+#' scale + 2 * shape * scale * (base::gamma(1 - (1 / shape)) - 1)
+#'
+#' @return numeric value representing the highest number of UMI to
+#' accept for downstream analysis of scRNA-seq data.
+#'
+#' @family SALSA support functions
+#'
 #' @param fit_fr `fitdist` object output from `fitdist_fr()`,
 #'    or numeric vector with names `"shape"`, `"scale"`.
 #' @param ... additional arguments are ignored.
@@ -458,27 +531,6 @@ get_upper_bound <- function
 }
 
 
-fit_weibull_test <- function
-(x)
-{
-   xbar <- mean(x)
-   varx <- var(x)
-   f <- function(b){
-      gamma(1+2/b) /  gamma(1+1/b)^2 - 1 - varx/xbar^2
-   }
-   bhat <- uniroot(f,c(0.02,50))$root
-   ahat <- xbar/gamma(1+1/bhat);
-   return(c(ahat,bhat))
-}
-
-fitdist_weibull_test <- function
-(x)
-{
-   fitdistrplus::fitdist(x,
-      distr="weibull",
-      method="mle");
-}
-
 #' Get step parameters for SALSA
 #'
 #' Get step parameters for SALSA
@@ -486,6 +538,12 @@ fitdist_weibull_test <- function
 #' This function takes a vector of counts and determines the
 #' appropriate step size to use when iterating the count
 #' threshold used by SALSA.
+#'
+#' @return `list` containing `"n_start"`, `"step_size"`,
+#'    `"max_step"`, and when `include_vector=TRUE` it
+#'    includes `"n_vector"` and `"count_vector"`.
+#'
+#' @family SALSA support functions
 #'
 #' @param x numeric vector of counts
 #' @param ... additional arguments are ignored
@@ -512,15 +570,18 @@ get_salsa_steps <- function
    n_start <- max(c(floor(sqrt(minUMI)), 1));
    n_bound <- floor(sqrt(maxUMI));
    step_size <- ceiling( log10 ( n_bound ) );
-   step_size;
+   max_step <- floor(maxUMI^(1/step_size));
+
    ret_vals <- list(n_start=n_start,
       step_size=step_size,
-      n_bound=n_bound);
+      max_step=max_step);
    if (include_vector) {
       n_vector <- seq(from=n_start,
-         to=n_bound,
-         by=step_size);
-      count_vector <- (n_vector^2) - 1;
+         to=max_step,
+         by=1);
+      count_vector <- (n_vector ^ step_size) - 1;
+      ## I also saw this variation on the equation, seems incorrect
+      #count_vector <- (n_vector-1) ^ step_size;
       ret_vals$n_vector <- n_vector;
       ret_vals$count_vector <- count_vector;
    }
@@ -531,37 +592,291 @@ get_salsa_steps <- function
 #'
 #' Perform SALSA steps for threshold detection
 #'
+#' This function is a wrapper around `fitdist_fr()` and
+#' `fitdist_fr_wei()`, which iterates through a wide range
+#' of possible thresholds to determine the fit parameters,
+#' and associated lower and upper bounds. The results
+#' are intended to be plotted to determine appropriate
+#' thresholds to use when calculating the lower and upper
+#' bounds for barcodes and genes in a single cell RNA-seq
+#' dataset.
+#'
+#' @param x numeric vector of counts, either the number of
+#'    UMI per cell, or the number of UMI per gene.
+#' @param n_vector,n_start,max_step,step_size,count_vector
+#'    arguments passed to `get_salsa_steps()` which returns
+#'    `count_vector`. If `count_vector` is supplied, it is
+#'    used without modification.
+#' @param dists character vector determining which distribution
+#'    fit functions to calculate, `"frechet"` fits the Frechet
+#'    distribution, `"frechet-weibull"` fits the five-parameter
+#'    combined Frechet and Weibull distributions. Typically the
+#'    Frechet parameters are used to define the upper bound,
+#'    and the Frechet-Weibull parameters are used to define the
+#'    lower bound.
+#' @param cache_fr,cache_fr_wei list objects output from
+#'    `memoise::cache_filesystem()` used to store cached
+#'    distribution fit results. When either are NULL, the
+#'    memoise cache steps are disabled, and the functions are
+#'    called directly.
+#' @param param_fr_wei `data.frame` output from `params_fr_wei()`
+#'    which defines the parameter upper and lower limits, and
+#'    start values for each parameter. If `NULL` then the
+#'    default values from `params_fr_wei()` are used.
+#' @param verbose logical indicating whether to print verbose output.
+#' @param ... additional arguments are ignored.
+#'
+#' @return `list` with one element for each value in `count_vector`,
+#'    where each list element contains a list with one entry for
+#'    each value in argument `dists` containing the fit parameters
+#'    for each selected distribution, as well as an entry `"min_count"`
+#'    which contains the minimum counts to use in each fit. When
+#'    `dists` contains `"frechet-weibull"` each list includes
+#'    `"lower_bound"`. When `dists` contains `"frechet"` each list
+#'    includes `"upper_bound"`. The output is intended to be passed
+#'    to `get_salsa_table()`.
+#'
+#' @family SALSA core functions
+#'
+#' @examples
+#' library(salsa);
+#' data(oz2_numi_per_cell);
+#' x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+#' x_salsa <- do_salsa_steps(x,
+#'    count_vector=c(16,32,128),
+#'    cache_fr=NULL,
+#'    cache_fr_wei=NULL);
+#' x_df <- get_salsa_table(x_salsa);
+#' x_df;
+#'
 #' @export
 do_salsa_steps <- function
 (x,
  n_vector=NULL,
  n_start=NULL,
- n_bound=NULL,
+ max_step=NULL,
  step_size=NULL,
+ count_vector=NULL,
+ dists=c("frechet", "frechet-weibull"),
+ cache_fr=cache_filesystem("./cache_fr"),
+ cache_fr_wei=cache_filesystem("./cache_fr_wei"),
+ param_fr_wei=NULL,
+ verbose=FALSE,
  ...)
 {
-   #
-   if (length(n_vector) == 0) {
-      if (length(n_start) == 0 ||
-            length(n_bound) == 0 ||
-            length(step_size) == 0) {
-         step_list <- get_salsa_steps(x, include_vector=TRUE);
-      }
-      if (length(n_start) == 0) {
-         n_start <- step_list$n_start;
-      }
-      if (length(n_bound) == 0) {
-         n_bound <- step_list$n_bound;
-      }
-      if (length(step_size) == 0) {
-         step_size <- step_list$step_size;
-      }
-      n_vector <- seq(from=n_start,
-         to=n_bound,
-         by=step_size);
+   ## Set up memoise for caching
+   if (length(cache_fr) == 0) {
+      fitdist_fr_m <- fitdist_fr;
+   } else {
+      fitdist_fr_m <- memoise::memoise(fitdist_fr,
+         cache=cache_fr);
    }
-   n_vector;
+   if (length(cache_fr) == 0) {
+      fitdist_fr_wei_m <- fitdist_fr_wei;
+   } else {
+      fitdist_fr_wei_m <- memoise::memoise(fitdist_fr_wei,
+         cache=cache_fr);
+   }
+
+   # verify count_vector by several possible methods
+   if (length(count_vector) == 0) {
+      ## count_vector not supplied so it must be created
+      if (length(n_vector) == 0) {
+         if (length(n_start) == 0 ||
+               length(n_bound) == 0 ||
+               length(step_size) == 0) {
+            step_list <- get_salsa_steps(x,
+               include_vector=TRUE);
+         }
+         if (length(n_start) == 0) {
+            n_start <- step_list$n_start;
+         }
+         if (length(max_step) == 0) {
+            max_step <- step_list$max_step;
+         }
+         if (length(step_size) == 0) {
+            step_size <- step_list$step_size;
+         }
+         n_vector <- seq(from=n_start,
+            to=max_step,
+            by=1);
+      }
+      if (verbose) {
+         jamba::printDebug("do_salsa_steps(): ",
+            "n_start:", n_start);
+         jamba::printDebug("do_salsa_steps(): ",
+            "step_size:", step_size);
+         jamba::printDebug("do_salsa_steps(): ",
+            "max_step:", max_step);
+         jamba::printDebug("do_salsa_steps(): ",
+            "n_vector:", n_vector);
+      }
+      count_vector <- (n_vector ^ step_size) - 1;
+   }
+   if (verbose) {
+      jamba::printDebug("do_salsa_steps(): ",
+         "count_vector:",
+         count_vector);
+   }
+
+   ## Define Frechet-Weibull starting parameters
+   if (length(param_fr_wei) == 0) {
+      if (verbose) {
+         jamba::printDebug("do_salsa_steps(): ",
+            "using defaults for ",
+            "param_fr_wei");
+      }
+      param_fr_wei <- params_fr_wei();
+   }
+
    ## Iterate each n_vector value:
    ## - use memoise(fitdist_fr_wei()) to cache Frechet-Weibull fit results
    ## - use memoise(fitdist_fr()) to cache Frechet fit results
+   fit_list <- lapply(jamba::nameVector(count_vector), function(icount){
+      if (verbose) {
+         jamba::printDebug("do_salsa_steps(): ",
+            "icount:", icount);
+      }
+      ret_vals <- list();
+      ret_vals$min_count <- icount;
+      usecounts <- x[x >= icount];
+      if (jamba::igrepHas("^frechet$", dists)) {
+         ## Fit Frechet
+         if (verbose) {
+            jamba::printDebug("do_salsa_steps(): ",
+               "fitdist_fr_m()");
+         }
+         fit_fr <- tryCatch({
+            fitdist_fr_m(usecounts,
+               ...);
+         }, error=function(e){
+            if (verbose) {
+               jamba::printDebug("do_salsa_steps(): ",
+                  "fitdist_fr_m() error:");
+               print(e);
+            }
+            NULL;
+         });
+         #fit_fr_v <- as.list(fitFL$estimate);
+         ret_vals$fit_fr <- fit_fr;
+         # get upper bound
+         if (length(fit_fr) > 0) {
+            upper_bound <- get_upper_bound(fit_fr);
+         } else {
+            upper_bound <- NA;
+         }
+         ret_vals$upper_bound <- upper_bound;
+      }
+      if (jamba::igrepHas("frechet-weibull", dists)) {
+         if (length(usecounts) < 6) {
+            ret_vals$fit_fr_wei <- NULL;
+            ret_vals$lower_bound <- NA;
+         } else {
+            ## Fit Frechet
+            if (verbose) {
+               jamba::printDebug("do_salsa_steps(): ",
+                  "fitdist_fr_wei_m()");
+            }
+            fit_fr_wei <- tryCatch({
+               fitdist_fr_wei_m(x=usecounts,
+                  param_fr_wei=param_fr_wei);
+            }, error=function(e){
+               if (verbose) {
+                  jamba::printDebug("do_salsa_steps(): ",
+                     "fitdist_fr_wei_m() error:");
+                  print(e);
+               }
+               NULL;
+            });
+            ret_vals$fit_fr_wei <- fit_fr_wei;
+            ## get lower bound
+            if (length(fit_fr_wei) > 0) {
+               lower_bound <- get_lower_bound(fit_fr_wei);
+            } else {
+               lower_bound <- NA;
+            }
+            ret_vals$lower_bound <- lower_bound;
+         }
+      }
+      ret_vals;
+   });
+   return(fit_list);
+}
+
+#' Get SALSA results as a data.frame
+#'
+#' Get SALSA results as a data.frame
+#'
+#' This function converts the list of lists output from
+#' `do_salsa_steps()` into a "tidy" data.frame intended
+#' to be used for visualization.
+#'
+#' @return `data.frame` containing one row per minimum count
+#'    threshold, with columns containing the Frechet and
+#'    Frechet-Weibull fit parameters, or NA values when there
+#'    are no parameters for the given minimum count threshold.
+#'
+#' @family SALSA core functions
+#'
+#' @param fit_list `list` output from `do_salsa_steps()`,
+#'    where each list element contains `min_count`,
+#'    and one or more of `fit_fr` and `fit_fr_wei`.
+#' @param verbose logical indicating whether to print verbose output.
+#' @param ... additional arguments are ignored.
+#'
+#' @examples
+#' library(salsa);
+#' data(oz2_numi_per_cell);
+#' x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+#' x_salsa <- do_salsa_steps(x,
+#'    count_vector=c(16,32,128),
+#'    cache_fr=NULL,
+#'    cache_fr_wei=NULL);
+#' x_df <- get_salsa_table(x_salsa);
+#' x_df;
+#'
+#' @export
+get_salsa_table <- function
+(fit_list,
+ verbose=FALSE,
+ ...)
+{
+   ##
+   if (length(fit_list) == 0) {
+      return(NULL);
+   }
+   fit_list_df <- rbindList(lapply(nameVectorN(fit_list), function(icount){
+      n <- fit_list[[icount]]$min_count;
+      if (verbose) {
+         printDebug("get_salsa_table(): ",
+            "icount:", icount);
+      }
+      if ("fit_fr" %in% names(fit_list[[icount]])) {
+         fr_coef <- as.list(coef(fit_list[[icount]]$fit_fr));
+      } else {
+         fr_coef <- list(shape=NA,
+            scale=NA);
+      }
+      if ("fit_fr_wei" %in% names(fit_list[[icount]])) {
+         fr_wei_coef <- as.list(coef(fit_list[[icount]]$fit_fr_wei));
+      } else {
+         fr_wei_coef <- list(fr_weight=NA,
+            fr_shape=NA,
+            fr_scale=NA,
+            wei_shape=NA,
+            wei_scale=NA);
+      }
+      data.frame(count=n,
+         shape=fr_coef$shape,
+         scale=fr_coef$scale,
+         fr_weight=fr_wei_coef$fr_weight,
+         fr_shape=fr_wei_coef$fr_shape,
+         fr_scale=fr_wei_coef$fr_scale,
+         wei_shape=fr_wei_coef$wei_shape,
+         wei_scale=fr_wei_coef$wei_scale,
+         lower_bound=fit_list[[icount]]$lower_bound,
+         upper_bound=fit_list[[icount]]$upper_bound
+      );
+   }));
+   fit_list_df;
 }

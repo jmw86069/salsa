@@ -3,6 +3,8 @@
 #'
 #' Sample data scRNA-seq nUMI per Cell
 #'
+#' @family SALSA example data
+#'
 #' @format `data.frame` with two colnames:
 #'
 #' * `barcode` represents the unique sequence barcode
@@ -15,6 +17,8 @@
 #' Sample data scRNA-seq nUMI per Gene
 #'
 #' Sample data scRNA-seq nUMI per Gene
+#'
+#' @family SALSA example data
 #'
 #' @format `data.frame` with two colnames:
 #'

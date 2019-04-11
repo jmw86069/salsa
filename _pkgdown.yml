@@ -1,0 +1,24 @@
+template:
+  params:
+    bootswatch: cosmo
+reference:
+- title: SALSA core functions
+  desc: Functions for the core SALSA workflow
+  contents:
+  - has_concept("SALSA core functions")
+- title: SALSA visualization functions
+  desc: Functions to visualize SALSA data
+  contents:
+  - has_concept("SALSA visualization functions")
+- title: SALSA example data
+  desc: Example SALSA data
+  contents:
+  - has_concept("SALSA example data")
+- title: SALSA distribution fit functions
+  desc: Functions supporting SALSA distribution fit
+  contents:
+  - has_concept("SALSA distribution fit functions")
+- title: SALSA support functions
+  desc: Back-end functions supporting SALSA steps
+  contents:
+  - has_concept("SALSA support functions")

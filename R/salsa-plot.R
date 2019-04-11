@@ -17,6 +17,12 @@
 #'    downstream analysis.
 #' @param ... additional arguments are ignored
 #'
+#' @return `ggplot` object sufficient to plot the Rank-Count
+#'    data, including the optional highlighted points based
+#'    upon the `highlight_range` values.
+#'
+#' @family SALSA visualization functions
+#'
 #' @examples
 #' library(salsa);
 #' data(oz2_numi_per_cell);
@@ -135,6 +141,8 @@ rank_count_plot <- function
 #'    `ggplot2::facet_wrap()` output, which puts a colored
 #'    title bar above the plot panel.
 #' @param ... additional arguments are ignored.
+#'
+#' @family SALSA visualization functions
 #'
 #' @examples
 #' library(salsa);

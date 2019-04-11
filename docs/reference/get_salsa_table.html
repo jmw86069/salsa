@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculate upper bound from Frechet fit — get_upper_bound • salsa</title>
+<title>Get SALSA results as a data.frame — get_salsa_table • salsa</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Calculate upper bound from Frechet fit — get_upper_bound" />
+<meta property="og:title" content="Get SALSA results as a data.frame — get_salsa_table" />
 
-<meta property="og:description" content="Calculate upper bound from Frechet fit" />
+<meta property="og:description" content="Get SALSA results as a data.frame" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -102,26 +102,31 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculate upper bound from Frechet fit</h1>
+    <h1>Get SALSA results as a data.frame</h1>
     <small class="dont-index">Source: <a href='https://github.com/jmw86069/salsa/blob/master/R/salsa-fit.R'><code>R/salsa-fit.R</code></a></small>
-    <div class="hidden name"><code>get_upper_bound.Rd</code></div>
+    <div class="hidden name"><code>get_salsa_table.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Calculate upper bound from Frechet fit</p>
+    <p>Get SALSA results as a data.frame</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>get_upper_bound</span>(<span class='no'>fit_fr</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>get_salsa_table</span>(<span class='no'>fit_list</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>fit_fr</th>
-      <td><p><code>fitdist</code> object output from <code>fitdist_fr()</code>,
-or numeric vector with names <code>"shape"</code>, <code>"scale"</code>.</p></td>
+      <th>fit_list</th>
+      <td><p><code>list</code> output from <code>do_salsa_steps()</code>,
+where each list element contains <code>min_count</code>,
+and one or more of <code>fit_fr</code> and <code>fit_fr_wei</code>.</p></td>
+    </tr>
+    <tr>
+      <th>verbose</th>
+      <td><p>logical indicating whether to print verbose output.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -131,24 +136,40 @@ or numeric vector with names <code>"shape"</code>, <code>"scale"</code>.</p></td
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>numeric value representing the highest number of UMI to
-accept for downstream analysis of scRNA-seq data.</p>
+    <p><code>data.frame</code> containing one row per minimum count
+threshold, with columns containing the Frechet and
+Frechet-Weibull fit parameters, or NA values when there
+are no parameters for the given minimum count threshold.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function takes the output from <code>fitdist_fr()</code> and
-calculates the associated predicted upper bound for
-number of UMI to accept for downstream analysis of
-scRNA-seq data.</p>
-<p>The equation:</p>
-<p>scale + 2 * shape * scale * (base::gamma(1 - (1 / shape)) - 1)</p>
+    <p>This function converts the list of lists output from
+<code><a href='https://www.rdocumentation.org/packages/salsa/topics/do_salsa_steps'>do_salsa_steps()</a></code> into a "tidy" data.frame intended
+to be used for visualization.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>Other SALSA support functions: <code>get_lower_bound</code>,
-  <code>get_salsa_steps</code></p></div>
+    <div class='dont-index'><p>Other SALSA core functions: <code><a href='https://www.rdocumentation.org/packages/salsa/topics/do_salsa_steps'>do_salsa_steps</a></code></p></div>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>salsa</span>);
+<span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>(<span class='no'>oz2_numi_per_cell</span>);
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='no'>oz2_numi_per_cell</span>$<span class='no'>count</span>[<span class='no'>oz2_numi_per_cell</span>$<span class='no'>count</span> <span class='kw'>&gt;=</span> <span class='fl'>16</span>];
+<span class='no'>x_salsa</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/do_salsa_steps'>do_salsa_steps</a></span>(<span class='no'>x</span>,
+   <span class='kw'>count_vector</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>16</span>,<span class='fl'>32</span>,<span class='fl'>128</span>),
+   <span class='kw'>cache_fr</span><span class='kw'>=</span><span class='kw'>NULL</span>,
+   <span class='kw'>cache_fr_wei</span><span class='kw'>=</span><span class='kw'>NULL</span>);
+<span class='no'>x_df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/get_salsa_table'>get_salsa_table</a></span>(<span class='no'>x_salsa</span>);
+<span class='no'>x_df</span>;</div><div class='output co'>#&gt;     count    shape     scale fr_weight fr_shape  fr_scale wei_shape wei_scale
+#&gt; 16     16 2.003168  25.18459      0.99      1.5  25.24369  1.514120  1775.742
+#&gt; 32     32 2.038619 138.20354      0.99      1.5 178.24735  1.500003  1700.841
+#&gt; 128   128 2.067224 265.69465      0.99      1.8 180.50922  1.500004  1699.818
+#&gt;     lower_bound upper_bound
+#&gt; 16     161.1956    102.8464
+#&gt; 32     480.9103    555.2840
+#&gt; 128    410.7675   1054.2652</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -160,7 +181,9 @@ scRNA-seq data.</p>
       <li><a href="#details">Details</a></li>
 
       <li><a href="#see-also">See also</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

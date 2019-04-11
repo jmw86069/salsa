@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">salsa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.900</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.900</span>
       </span>
     </div>
 
@@ -173,6 +173,10 @@ title bar above the plot panel.</p></td>
     <p>This function plots the two distributions, Frechet and Weibull,
 using the fit parameters provided.</p>
     
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other SALSA visualization functions: <code><a href='https://www.rdocumentation.org/packages/salsa/topics/rank_count_plot'>rank_count_plot</a></code></p></div>
+    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>salsa</span>);
@@ -180,7 +184,8 @@ using the fit parameters provided.</p>
 <span class='no'>param_fr_wei</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/params_fr_wei'>params_fr_wei</a></span>();
 <span class='no'>usecounts</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sort'>sort</a></span>(<span class='no'>oz2_numi_per_cell</span>$<span class='no'>count</span>);
 <span class='no'>usecounts</span> <span class='kw'>&lt;-</span> <span class='no'>usecounts</span>[<span class='no'>usecounts</span> <span class='kw'>&gt;=</span> <span class='fl'>16</span>];
-<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/fitdist_fr_wei'>fitdist_fr_wei</a></span>(<span class='kw'>x</span><span class='kw'>=</span><span class='no'>usecounts</span>, <span class='kw'>param_fr_wei</span><span class='kw'>=</span><span class='no'>param_fr_wei</span>);</div><div class='output co'>#&gt; <span class='warning'>Warning: Some parameter names have no starting/fixed value but have a default value: verbose.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: The dfr_wei function should raise an error when names are incorrectly named</span></div><div class='output co'>#&gt; <span class='warning'>Warning: The pfr_wei function should raise an error when names are incorrectly named</span></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>);</div><div class='output co'>#&gt; <span class='warning'>Warning: package 'colorspace' was built under R version 3.5.2</span></div><div class='img'><img src='plot_fr_wei-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>ylim</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0.005</span>));</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 80 rows containing missing values (geom_path).</span></div><div class='img'><img src='plot_fr_wei-2.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>scale_y</span><span class='kw'>=</span><span class='fl'>TRUE</span>) + <span class='fu'>ggtitle</span>(<span class='st'>"densities scaled to max height"</span>)</div><div class='img'><img src='plot_fr_wei-3.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>scale_y</span><span class='kw'>=</span><span class='fl'>TRUE</span>, <span class='kw'>highlight_range</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>100</span>, <span class='fl'>2200</span>))</div><div class='img'><img src='plot_fr_wei-4.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/fitdist_fr_wei'>fitdist_fr_wei</a></span>(<span class='kw'>x</span><span class='kw'>=</span><span class='no'>usecounts</span>, <span class='kw'>param_fr_wei</span><span class='kw'>=</span><span class='no'>param_fr_wei</span>);
+<span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>);</div><div class='output co'>#&gt; <span class='warning'>Warning: package ‘colorspace’ was built under R version 3.5.2</span></div><div class='img'><img src='plot_fr_wei-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>ylim</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0.005</span>));</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 80 rows containing missing values (geom_path).</span></div><div class='img'><img src='plot_fr_wei-2.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>scale_y</span><span class='kw'>=</span><span class='fl'>TRUE</span>) + <span class='fu'>ggtitle</span>(<span class='st'>"densities scaled to max height"</span>)</div><div class='img'><img src='plot_fr_wei-3.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/salsa/topics/plot_fr_wei'>plot_fr_wei</a></span>(<span class='no'>fit1</span>, <span class='kw'>scale_y</span><span class='kw'>=</span><span class='fl'>TRUE</span>, <span class='kw'>highlight_range</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>100</span>, <span class='fl'>2200</span>))</div><div class='img'><img src='plot_fr_wei-4.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -189,6 +194,8 @@ using the fit parameters provided.</p>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#details">Details</a></li>
+
+      <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

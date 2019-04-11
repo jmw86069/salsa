@@ -7,16 +7,13 @@
 \title{The Frechet-Weibull Distribution}
 \usage{
 dfr_wei(x, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE, verbose = FALSE,
-  ...)
+  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
 
 qfr_wei(p, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE, verbose = FALSE,
-  ...)
+  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
 
 pfr_wei(q, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE, verbose = FALSE,
-  ...)
+  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
 }
 \arguments{
 \item{x}{vector of quantiles}
@@ -34,10 +31,6 @@ the corresponding Weibull weight is \code{(1 - fr_weight)}.}
 
 \item{log}{logical passed to \code{actuar::dinvweibull}, if \code{TRUE}
 probabilities/densities are returned as \code{log(p)}.}
-
-\item{verbose}{logical indicating whether to print verbose output.}
-
-\item{...}{additional arguments are ignored.}
 }
 \description{
 The Frechet-Weibull Distribution
@@ -48,3 +41,8 @@ and random generation for the combined Frechet-Weibull
 distribution with five parameters: \code{fr_shape}, \code{fr_scale},
 \code{wei_shape}, \code{wei_scale}, and \code{fr_weight}.
 }
+\seealso{
+Other SALSA distribution fit functions: \code{\link{fitdist_fr_wei}},
+  \code{\link{fitdist_fr}}, \code{\link{params_fr_wei}}
+}
+\concept{SALSA distribution fit functions}

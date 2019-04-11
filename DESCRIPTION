@@ -1,7 +1,7 @@
 Package: salsa
 Type: Package
 Title: Single-cell Amalgamation by Latent Semantic Analysis (SALSA)
-Version: 0.0.0.900
+Version: 0.0.1.900
 Authors@R: c(
     person(given="James M.", family="Ward",
        email="jmw86069@gmail.com", role=c("aut", "cre")),
@@ -17,7 +17,9 @@ Imports: jamba,
     actuar,
     fitdistrplus,
     moments,
-    shiny
+    tidyr,
+    shiny,
+    memoise
 Suggests:
 License: MIT
 Encoding: UTF-8

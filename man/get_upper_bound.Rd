@@ -12,6 +12,25 @@ or numeric vector with names \code{"shape"}, \code{"scale"}.}
 
 \item{...}{additional arguments are ignored.}
 }
+\value{
+numeric value representing the highest number of UMI to
+accept for downstream analysis of scRNA-seq data.
+}
 \description{
 Calculate upper bound from Frechet fit
 }
+\details{
+This function takes the output from \code{fitdist_fr()} and
+calculates the associated predicted upper bound for
+number of UMI to accept for downstream analysis of
+scRNA-seq data.
+
+The equation:
+
+scale + 2 * shape * scale * (base::gamma(1 - (1 / shape)) - 1)
+}
+\seealso{
+Other SALSA support functions: \code{\link{get_lower_bound}},
+  \code{\link{get_salsa_steps}}
+}
+\concept{SALSA support functions}

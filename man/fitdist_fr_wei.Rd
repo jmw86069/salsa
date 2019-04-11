@@ -4,7 +4,7 @@
 \alias{fitdist_fr_wei}
 \title{Fit Frechet-Weibull distribution to non-censored data}
 \usage{
-fitdist_fr_wei(x, param_fr_wei, method = "mle",
+fitdist_fr_wei(x, param_fr_wei = params_fr_wei(), method = "mle",
   optim.method = "Nelder-Mead", log = FALSE, verbose = FALSE, ...)
 }
 \arguments{
@@ -42,4 +42,25 @@ support function, for example when \code{method="mle"} the
 distribution fit function is \code{fitdistrplus::mledist()},
 which then calls \code{stats::optim()}. Arguments are
 passed to these functions using \code{...} where applicable.
+
+TODO: This function currently expects to use \code{method="mle"}
+which utilizes the upper,lower,start parameters for each
+of the five parameters. Other methods may have different
+requirements which are not formally handled. In future
+we will evaluate and support additional methods, modifying
+the call to \code{fitdistrplus::fitdist()} as needed.
 }
+\examples{
+library(salsa);
+data(oz2_numi_per_cell);
+x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+fit_fr_wei <- fitdist_fr_wei(x);
+# print coefficients
+print(coef(fit_fr_wei));
+
+}
+\seealso{
+Other SALSA distribution fit functions: \code{\link{dfr_wei}},
+  \code{\link{fitdist_fr}}, \code{\link{params_fr_wei}}
+}
+\concept{SALSA distribution fit functions}

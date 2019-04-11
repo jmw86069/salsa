@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">salsa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.900</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.900</span>
       </span>
     </div>
 
@@ -114,16 +114,13 @@
     </div>
 
     <pre class="usage"><span class='fu'>dfr_wei</span>(<span class='no'>x</span>, <span class='kw'>fr_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>fr_scale</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>wei_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>...</span>)
+  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>qfr_wei</span>(<span class='no'>p</span>, <span class='kw'>fr_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>fr_scale</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>wei_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>...</span>)
+  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>pfr_wei</span>(<span class='no'>q</span>, <span class='kw'>fr_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>fr_scale</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>wei_shape</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>...</span>)</pre>
+  <span class='kw'>wei_scale</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>fr_weight</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,14 +155,6 @@ the corresponding Weibull weight is <code>(1 - fr_weight)</code>.</p></td>
       <td><p>logical passed to <code><a href='https://www.rdocumentation.org/packages/actuar/topics/InverseWeibull'>actuar::dinvweibull</a></code>, if <code>TRUE</code>
 probabilities/densities are returned as <code><a href='https://www.rdocumentation.org/packages/base/topics/Log'>log(p)</a></code>.</p></td>
     </tr>
-    <tr>
-      <th>verbose</th>
-      <td><p>logical indicating whether to print verbose output.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>additional arguments are ignored.</p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
@@ -175,6 +164,11 @@ and random generation for the combined Frechet-Weibull
 distribution with five parameters: <code>fr_shape</code>, <code>fr_scale</code>,
 <code>wei_shape</code>, <code>wei_scale</code>, and <code>fr_weight</code>.</p>
     
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other SALSA distribution fit functions: <code>fitdist_fr_wei</code>,
+  <code>fitdist_fr</code>, <code>params_fr_wei</code></p></div>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -183,6 +177,8 @@ distribution with five parameters: <code>fr_shape</code>, <code>fr_scale</code>,
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#details">Details</a></li>
+
+      <li><a href="#see-also">See also</a></li>
           </ul>
 
   </div>

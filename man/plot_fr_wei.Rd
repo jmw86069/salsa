@@ -57,3 +57,7 @@ plot_fr_wei(fit1, scale_y=TRUE) + ggtitle("densities scaled to max height")
 plot_fr_wei(fit1, scale_y=TRUE, highlight_range=c(100, 2200))
 
 }
+\seealso{
+Other SALSA visualization functions: \code{\link{rank_count_plot}}
+}
+\concept{SALSA visualization functions}

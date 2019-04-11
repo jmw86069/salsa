@@ -7,22 +7,27 @@
 params_fr_wei(param_fr_wei = NULL, ...)
 }
 \arguments{
-\item{param_fr_wei}{\code{data.frame} containing colnames
-\code{"fr_shape"}, \code{"fr_scale"}, \code{"wei_shape"}, \code{"wei_scale"},
-and \code{"fr_weight"}, and rownames \code{"start"}, \code{"lower"},
-\code{"upper"}.}
+\item{param_fr_wei}{\code{data.frame} containing one or more
+colnames \code{"fr_shape"}, \code{"fr_scale"}, \code{"wei_shape"},
+\code{"wei_scale"}, \code{"fr_weight"}, and one or more rownames
+\code{"start"}, \code{"lower"}, \code{"upper"}. Any non-NA values
+replace the corresponding default values.}
 
 \item{...}{additional arguments are ignored.}
+}
+\value{
+\code{matrix} of five parameter upper, lower, and start
+values to be used by \code{fitdist_fr_wei()}.
 }
 \description{
 Parameter bounds for Frechet-Weibull fit
 }
 \details{
-This function defines a data.frame of parameter bounds,
-restricting the range of values allowed during the
-Frechet-Weibull distribution fit. Each of the five
-parameters are given \code{start}, \code{lower}, and \code{upper}
-values:
+This function defines a \code{matrix} with default
+parameter bounds to restrict the range of values
+allowed during the Frechet-Weibull distribution fit.
+Each of the five  parameters are given \code{start},
+\code{lower}, and \code{upper} values:
 \itemize{
 \item \code{fr_weight} the weight of Frechet relative to Weibull,
 on a scale of 0 to 1.
@@ -31,4 +36,26 @@ on a scale of 0 to 1.
 \item \code{wei_shape} the shape value for the Weibull distribution
 \item \code{wei_scale} the scale value for the Weibull distribution
 }
+
+The output \code{matrix} can be modified then passed to
+\code{do_salsa_steps()} in order to customize the model fit.
 }
+\examples{
+# default matrix of parameters
+param_fr_wei <- params_fr_wei();
+param_fr_wei;
+
+# modify some values
+custom_param_fr_wei_m <- rbind(
+   start=c(fr_shape=50, wei_shape=40),
+   lower=c(fr_shape=NA, wei_shape=400));
+custom_param_fr_wei_m;
+custom_param_fr_wei <- params_fr_wei(custom_param_fr_wei_m);
+custom_param_fr_wei;
+
+}
+\seealso{
+Other SALSA distribution fit functions: \code{\link{dfr_wei}},
+  \code{\link{fitdist_fr_wei}}, \code{\link{fitdist_fr}}
+}
+\concept{SALSA distribution fit functions}

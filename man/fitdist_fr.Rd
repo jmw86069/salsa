@@ -19,7 +19,8 @@ matching estimation.}
 otherwise output is set to \code{NULL}.}
 
 \item{order, central, absolute, na.rm}{arguments passed to
-\code{moments::moment()}.}
+\code{moments::moment()}. These values do not typically need to
+be customized.}
 
 \item{verbose}{logical indicating whether to print verbose output.}
 
@@ -49,8 +50,14 @@ passed to these functions using \code{...} where applicable.
 }
 \examples{
 data(oz2_numi_per_cell);
-usecounts <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
-fit_fr <- fitdist_fr(x=usecounts);
-coef(fit_fr);
+x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+fit_fr <- fitdist_fr(x);
+# print coefficients
+print(coef(fit_fr));
 
 }
+\seealso{
+Other SALSA distribution fit functions: \code{\link{dfr_wei}},
+  \code{\link{fitdist_fr_wei}}, \code{\link{params_fr_wei}}
+}
+\concept{SALSA distribution fit functions}

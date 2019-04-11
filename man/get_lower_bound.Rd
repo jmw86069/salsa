@@ -13,6 +13,25 @@ or numeric vector with names \code{"fr_weight"}, \code{"fr_shape"},
 
 \item{...}{additional arguments are ignored.}
 }
+\value{
+numeric value representing the lowest number of UMI to
+accept for downstream analysis of scRNA-seq data.
+}
 \description{
 Calculate lower bound from Frechet-Weibull fit
 }
+\details{
+This function takes the output from \code{fitdist_fr_wei()} and
+calculates the associated predicted lower bound for
+number of UMI to accept for downstream analysis of
+scRNA-seq data.
+
+The equation:
+
+fr_scale * (wei_scale / fr_scale) ^ (fr_weight / (fr_shape * wei_shape))
+}
+\seealso{
+Other SALSA support functions: \code{\link{get_salsa_steps}},
+  \code{\link{get_upper_bound}}
+}
+\concept{SALSA support functions}

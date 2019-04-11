@@ -22,6 +22,11 @@ downstream analysis.}
 
 \item{...}{additional arguments are ignored}
 }
+\value{
+\code{ggplot} object sufficient to plot the Rank-Count
+data, including the optional highlighted points based
+upon the \code{highlight_range} values.
+}
 \description{
 Rank-Count plot
 }
@@ -48,3 +53,7 @@ rank_count_plot(usecounts,
    ggtitle("Filtered for counts >= 16");
 
 }
+\seealso{
+Other SALSA visualization functions: \code{\link{plot_fr_wei}}
+}
+\concept{SALSA visualization functions}

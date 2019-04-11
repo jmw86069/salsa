@@ -11,6 +11,11 @@ get_salsa_steps(x, include_vector = FALSE, ...)
 
 \item{...}{additional arguments are ignored}
 }
+\value{
+\code{list} containing \code{"n_start"}, \code{"step_size"},
+\code{"max_step"}, and when \code{include_vector=TRUE} it
+includes \code{"n_vector"} and \code{"count_vector"}.
+}
 \description{
 Get step parameters for SALSA
 }
@@ -30,3 +35,8 @@ get_salsa_steps(usecounts);
 get_salsa_steps(usecounts, include_vector=TRUE);
 
 }
+\seealso{
+Other SALSA support functions: \code{\link{get_lower_bound}},
+  \code{\link{get_upper_bound}}
+}
+\concept{SALSA support functions}

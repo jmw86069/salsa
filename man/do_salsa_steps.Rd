@@ -4,9 +4,80 @@
 \alias{do_salsa_steps}
 \title{Perform SALSA steps for threshold detection}
 \usage{
-do_salsa_steps(x, n_vector = NULL, n_start = NULL, n_bound = NULL,
-  step_size = NULL, ...)
+do_salsa_steps(x, n_vector = NULL, n_start = NULL, max_step = NULL,
+  step_size = NULL, count_vector = NULL, dists = c("frechet",
+  "frechet-weibull"), cache_fr = cache_filesystem("./cache_fr"),
+  cache_fr_wei = cache_filesystem("./cache_fr_wei"),
+  param_fr_wei = NULL, verbose = FALSE, ...)
+}
+\arguments{
+\item{x}{numeric vector of counts, either the number of
+UMI per cell, or the number of UMI per gene.}
+
+\item{n_vector, n_start, max_step, step_size, count_vector}{arguments passed to \code{get_salsa_steps()} which returns
+\code{count_vector}. If \code{count_vector} is supplied, it is
+used without modification.}
+
+\item{dists}{character vector determining which distribution
+fit functions to calculate, \code{"frechet"} fits the Frechet
+distribution, \code{"frechet-weibull"} fits the five-parameter
+combined Frechet and Weibull distributions. Typically the
+Frechet parameters are used to define the upper bound,
+and the Frechet-Weibull parameters are used to define the
+lower bound.}
+
+\item{cache_fr, cache_fr_wei}{list objects output from
+\code{memoise::cache_filesystem()} used to store cached
+distribution fit results. When either are NULL, the
+memoise cache steps are disabled, and the functions are
+called directly.}
+
+\item{param_fr_wei}{\code{data.frame} output from \code{params_fr_wei()}
+which defines the parameter upper and lower limits, and
+start values for each parameter. If \code{NULL} then the
+default values from \code{params_fr_wei()} are used.}
+
+\item{verbose}{logical indicating whether to print verbose output.}
+
+\item{...}{additional arguments are ignored.}
+}
+\value{
+\code{list} with one element for each value in \code{count_vector},
+where each list element contains a list with one entry for
+each value in argument \code{dists} containing the fit parameters
+for each selected distribution, as well as an entry \code{"min_count"}
+which contains the minimum counts to use in each fit. When
+\code{dists} contains \code{"frechet-weibull"} each list includes
+\code{"lower_bound"}. When \code{dists} contains \code{"frechet"} each list
+includes \code{"upper_bound"}. The output is intended to be passed
+to \code{get_salsa_table()}.
 }
 \description{
 Perform SALSA steps for threshold detection
 }
+\details{
+This function is a wrapper around \code{fitdist_fr()} and
+\code{fitdist_fr_wei()}, which iterates through a wide range
+of possible thresholds to determine the fit parameters,
+and associated lower and upper bounds. The results
+are intended to be plotted to determine appropriate
+thresholds to use when calculating the lower and upper
+bounds for barcodes and genes in a single cell RNA-seq
+dataset.
+}
+\examples{
+library(salsa);
+data(oz2_numi_per_cell);
+x <- oz2_numi_per_cell$count[oz2_numi_per_cell$count >= 16];
+x_salsa <- do_salsa_steps(x,
+   count_vector=c(16,32,128),
+   cache_fr=NULL,
+   cache_fr_wei=NULL);
+x_df <- get_salsa_table(x_salsa);
+x_df;
+
+}
+\seealso{
+Other SALSA core functions: \code{\link{get_salsa_table}}
+}
+\concept{SALSA core functions}

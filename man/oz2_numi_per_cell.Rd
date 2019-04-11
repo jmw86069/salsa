@@ -17,4 +17,8 @@ oz2_numi_per_cell
 \description{
 Sample data scRNA-seq nUMI per Cell
 }
+\seealso{
+Other SALSA example data: \code{\link{oz2_numi_per_gene}}
+}
+\concept{SALSA example data}
 \keyword{datasets}
