@@ -1,3 +1,10 @@
+# salsa version 0.0.2.900
+
+## additions
+
+* First prototype of R-shiny app for the nUMI per cell and gene
+threshold workflow.
+
 # salsa version 0.0.1.900
 
 ## additions

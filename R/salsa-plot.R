@@ -23,6 +23,8 @@
 #'
 #' @family SALSA visualization functions
 #'
+#' @import ggplot2
+#'
 #' @examples
 #' library(salsa);
 #' data(oz2_numi_per_cell);
@@ -143,6 +145,8 @@ rank_count_plot <- function
 #' @param ... additional arguments are ignored.
 #'
 #' @family SALSA visualization functions
+#'
+#' @import ggplot2
 #'
 #' @examples
 #' library(salsa);

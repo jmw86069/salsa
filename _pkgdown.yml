@@ -22,3 +22,8 @@ reference:
   desc: Back-end functions supporting SALSA steps
   contents:
   - has_concept("SALSA support functions")
+- title: SALSA Shiny functions
+  desc: Functions supporting the SALSA R-shiny app
+  contents:
+  - has_concept("SALSA Shiny functions")
+

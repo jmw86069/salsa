@@ -8,7 +8,8 @@ do_salsa_steps(x, n_vector = NULL, n_start = NULL, max_step = NULL,
   step_size = NULL, count_vector = NULL, dists = c("frechet",
   "frechet-weibull"), cache_fr = cache_filesystem("./cache_fr"),
   cache_fr_wei = cache_filesystem("./cache_fr_wei"),
-  param_fr_wei = NULL, verbose = FALSE, ...)
+  param_fr_wei = NULL, do_shiny_progress = FALSE, verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{x}{numeric vector of counts, either the number of
@@ -36,6 +37,13 @@ called directly.}
 which defines the parameter upper and lower limits, and
 start values for each parameter. If \code{NULL} then the
 default values from \code{params_fr_wei()} are used.}
+
+\item{do_shiny_progress}{logical indicating whether to
+send progress updates to a running shiny app, using
+the \code{shiny::withProgress()} and \code{shiny::incProgress()}
+methods. This function only calls \code{shiny::incProgress()}
+and assumes the \code{shiny::withProgress()} has already bee
+initialized.}
 
 \item{verbose}{logical indicating whether to print verbose output.}
 

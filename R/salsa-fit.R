@@ -623,6 +623,12 @@ get_salsa_steps <- function
 #'    which defines the parameter upper and lower limits, and
 #'    start values for each parameter. If `NULL` then the
 #'    default values from `params_fr_wei()` are used.
+#' @param do_shiny_progress logical indicating whether to
+#'    send progress updates to a running shiny app, using
+#'    the `shiny::withProgress()` and `shiny::incProgress()`
+#'    methods. This function only calls `shiny::incProgress()`
+#'    and assumes the `shiny::withProgress()` has already bee
+#'    initialized.
 #' @param verbose logical indicating whether to print verbose output.
 #' @param ... additional arguments are ignored.
 #'
@@ -649,6 +655,8 @@ get_salsa_steps <- function
 #' x_df <- get_salsa_table(x_salsa);
 #' x_df;
 #'
+#' @importFrom memoise cache_filesystem
+#'
 #' @export
 do_salsa_steps <- function
 (x,
@@ -661,6 +669,7 @@ do_salsa_steps <- function
  cache_fr=cache_filesystem("./cache_fr"),
  cache_fr_wei=cache_filesystem("./cache_fr_wei"),
  param_fr_wei=NULL,
+ do_shiny_progress=FALSE,
  verbose=FALSE,
  ...)
 {
@@ -740,6 +749,10 @@ do_salsa_steps <- function
       ret_vals <- list();
       ret_vals$min_count <- icount;
       usecounts <- x[x >= icount];
+      if (do_shiny_progress) {
+         incProgress(1/length(count_vector)*2,
+            detail=paste0("Calculating parameters with counts >= ", icount));
+      }
       if (jamba::igrepHas("^frechet$", dists)) {
          ## Fit Frechet
          if (verbose) {
@@ -766,6 +779,10 @@ do_salsa_steps <- function
             upper_bound <- NA;
          }
          ret_vals$upper_bound <- upper_bound;
+      }
+      if (do_shiny_progress) {
+         incProgress(1/length(count_vector)*2,
+            detail=paste0("Calculating parameters with counts >= ", icount));
       }
       if (jamba::igrepHas("frechet-weibull", dists)) {
          if (length(usecounts) < 6) {
@@ -879,4 +896,73 @@ get_salsa_table <- function
       );
    }));
    fit_list_df;
+}
+
+#' Read nUMI tab-delimited file
+#'
+#' Read nUMI tab-delimited file
+#'
+#' This function is a simple wrapper around `utils::read.table()`
+#' with some follow-up data cleaning to handle optional header
+#' row, and sometimes having space delimiter instead of tab.
+#'
+#' For most validation checks, NULL is returned. Data is expected to
+#' have at least 2 columns, where column 2 has class `"numeric"`
+#' or `"integer"`.
+#'
+#' @return `data.frame` or NULL if validation checks fail.
+#'
+#' @param file input file connection
+#' @param text optional text input to `utils::read.table()`, used when
+#'    there is no `file`.
+#' @param ... additional arguments are passed to `utils::read.table()`.
+#'
+#' @examples
+#' library(salsa);
+#' data(oz2_numi_per_cell);
+#' text <- jamba::pasteByRow(oz2_numi_per_cell[1:10,], sep=" ");
+#' read_numi(text=text);
+#'
+#' @export
+read_numi <- function
+(file=NULL,
+ text=NULL,
+ sep="",
+ ...)
+{
+   ## Purpose is to wrap several steps to import numi tab-delimited
+   ## files, with or without header, and sometimes with space-delimiter
+   if (length(file) == 0) {
+      if (length(text) == 0) {
+         warning("read_numi() requires either file or text.");
+         return(NULL);
+      }
+      numi_df <- read.table(text=text,
+         sep=sep,
+         ...);
+   } else {
+      numi_df <- read.table(file=file,
+         sep=sep,
+         ...);
+   }
+   ## Check for header row
+   if (igrepHas("[a-zA-Z]", numi_df[1,2])) {
+      numi_df <- read.table(
+         text=pasteByRow(numi_df, sep="\t"),
+         header=TRUE,
+         sep="\t");
+   }
+   ## Check ncol
+   if (ncol(numi_df) < 2) {
+      warning("Data does not have 2 columns, check the delimiter and try again.");
+      return(NULL);
+   }
+   ## Confirm and coerce column 2 to numeric if needed
+   if (!igrepHas("numeric|integer", class(numi_df[,2]))) {
+      numi_df[,2] <- as.numeric(numi_df[,2]);
+      if (all(is.na(numi_df[,2]))) {
+         warning("Warning: all values in column 2 are NA and unusable by SALSA.");
+      }
+   }
+   return(numi_df);
 }
