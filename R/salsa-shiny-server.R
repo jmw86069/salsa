@@ -16,12 +16,6 @@ salsaAppServer <- function
  output,
  session)
 {
-   if (!file.exists("/Users/wardjm/nchar_import_guide.txt")) {
-      write.table(file="/Users/wardjm/nchar_import_guide.txt",
-         data.frame(nchar_import_guide=nchar(import_guide)),
-         sep="\t");
-   }
-   jamba::printDebug("nchar(import_guide):", nchar(import_guide));
 
    cellthreshold_guide <- shiny::fluidPage(
       htmltools::h1("Cell Threshold",

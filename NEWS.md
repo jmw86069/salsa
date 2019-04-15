@@ -1,3 +1,9 @@
+# salsa version 0.0.3.900
+
+## minor fixes
+
+* Reference to local debugging files were removed from R-shiny app.
+
 # salsa version 0.0.2.900
 
 ## additions
