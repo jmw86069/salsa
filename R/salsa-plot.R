@@ -125,6 +125,10 @@ rank_count_plot <- function
 #' using the fit parameters provided.
 #'
 #' @param fit `fitdist` object as output from `fitdist_fr_wei()`.
+#'    Optionally `fit` can be a named vector with `"fr_weight"`,
+#'    `"fr_shape"`, `"fr_scale"`, `"wei_shape"`, `"wei_scale"`.
+#'    In that case, use `addx` to supply numeric range of data
+#'    to plot.
 #' @param addx optional numeric vector of x values to add to
 #'    the x-axis range.
 #' @param ylim,xlim optional numeric vector describing the y-axis
@@ -175,8 +179,16 @@ plot_fr_wei <- function
 {
    ## Simple function to plot the Frechet-Weibull fit
    type <- match.arg(type);
-   coef_fr_wei <- coef(fit);
-   x <- unique(sort(c(addx, fit$data)));
+   if ("numeric" %in% class(fit)) {
+      coef_fr_wei <- fit;
+   } else {
+      coef_fr_wei <- coef(fit);
+   }
+   if ("data" %in% names(fit)) {
+      x <- jamba::rmNA(unique(sort(c(addx, fit[["data"]]))));
+   } else {
+      x <- jamba::rmNA(unique(sort(addx)));
+   }
    y1 <- dinvweibull(x=x,
       scale=coef_fr_wei["fr_scale"],
       shape=coef_fr_wei["fr_shape"],

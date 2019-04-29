@@ -7,13 +7,13 @@
 \title{The Frechet-Weibull Distribution}
 \usage{
 dfr_wei(x, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
+  wei_scale = 1000, fr_weight = 0.5)
 
 qfr_wei(p, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
+  wei_scale = 1000, fr_weight = 0.5)
 
 pfr_wei(q, fr_shape = 2, fr_scale = 100, wei_shape = 2,
-  wei_scale = 1000, fr_weight = 0.5, log = FALSE)
+  wei_scale = 1000, fr_weight = 0.5)
 }
 \arguments{
 \item{x}{vector of quantiles}
@@ -28,9 +28,6 @@ pfr_wei(q, fr_shape = 2, fr_scale = 100, wei_shape = 2,
 
 \item{fr_weight}{numeric value from 0 to 1, the Frechet weight, where
 the corresponding Weibull weight is \code{(1 - fr_weight)}.}
-
-\item{log}{logical passed to \code{actuar::dinvweibull}, if \code{TRUE}
-probabilities/densities are returned as \code{log(p)}.}
 }
 \description{
 The Frechet-Weibull Distribution

@@ -1,3 +1,26 @@
+# salsa version 0.0.4.900
+
+## changes to R-shiny app
+
+* Cell x-axis can be log-scaled.
+* Fit method defaults to "mge" with goodness of fit "KS" for
+Frechet-Weibull distribution. The previous "mle" is available
+for comparison and testing.
+
+## changes to existing functions
+
+* The fr_wei distribution functions `qfr_wei`, `pfr_wei`, `dfr_wei`
+have had the argument `log=FALSE` removed, under guidance of the
+`fitdistrplus` package vignette.
+
+## Todo
+
+* evaluate alternative optimization functions, influenced by a blog
+post by one of the original authors: https://www.r-bloggers.com/why-optim-is-out-of-date/
+who suggests considering the `"optextras"` R package on CRAN.
+Major benefit would be substantial speed improvement, and potential
+increase in robustness.
+
 # salsa version 0.0.3.900
 
 ## minor fixes

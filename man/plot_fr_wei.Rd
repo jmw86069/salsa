@@ -9,7 +9,11 @@ plot_fr_wei(fit, addx = NULL, ylim = NULL, xlim = NULL,
   highlight_range = NULL, do_facet = TRUE, ...)
 }
 \arguments{
-\item{fit}{\code{fitdist} object as output from \code{fitdist_fr_wei()}.}
+\item{fit}{\code{fitdist} object as output from \code{fitdist_fr_wei()}.
+Optionally \code{fit} can be a named vector with \code{"fr_weight"},
+\code{"fr_shape"}, \code{"fr_scale"}, \code{"wei_shape"}, \code{"wei_scale"}.
+In that case, use \code{addx} to supply numeric range of data
+to plot.}
 
 \item{addx}{optional numeric vector of x values to add to
 the x-axis range.}

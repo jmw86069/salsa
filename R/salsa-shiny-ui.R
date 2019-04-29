@@ -89,14 +89,25 @@ salsaAppUI <- function
             shinydashboard::box(
                title="Calculate or Import Parameters",
                status="warning",
+               collapsible=TRUE,
                solidHeader=TRUE,
                width=12,
-               fileInput(
-                  label="Pre-calculated nUMI per cell parameters",
-                  inputId="import_cell_params",
-                  multiple=FALSE),
+               conditionalPanel(
+                  condition="output.cell_count_slider == 12345678",
+                  fileInput(
+                     label="Pre-calculated nUMI per cell parameters",
+                     inputId="import_cell_params",
+                     multiple=FALSE)
+               ),
                conditionalPanel(
                   condition="output.cell_file_uploaded == true",
+                  shinyWidgets::prettySwitch(
+                     inputId="log_cell_x",
+                     label="Log-scale x-axis?",
+                     fill=TRUE,
+                     value=FALSE,
+                     inline=TRUE
+                  ),
                   sliderInput(
                      "cell_count_slider",
                      label="Minimum count range",
@@ -107,11 +118,12 @@ salsaAppUI <- function
                      round=TRUE,
                      pre=">="
                   ),
-                  shinyBS::bsTooltip(
-                     id="cell_count_slider",
-                     title="Counts will be filtered for at least this many counts prior to parameter fitting.",
-                     placement="top",
-                     trigger="hover"
+                  selectInput(
+                     inputId="cell_fr_wei_method",
+                     label="Frechet-Weibull fit method",
+                     choices=c("mle", "mge"),
+                     selected="mge",
+                     selectize=FALSE
                   ),
                   actionButton("calc_cell_params",
                      label="Calculate Cell Parameters")

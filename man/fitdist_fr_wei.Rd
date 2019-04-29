@@ -4,8 +4,9 @@
 \alias{fitdist_fr_wei}
 \title{Fit Frechet-Weibull distribution to non-censored data}
 \usage{
-fitdist_fr_wei(x, param_fr_wei = params_fr_wei(), method = "mle",
-  optim.method = "Nelder-Mead", log = FALSE, verbose = FALSE, ...)
+fitdist_fr_wei(x, param_fr_wei = params_fr_wei(), method = c("mle",
+  "mme", "qme", "mge"), optim.method = "Nelder-Mead", gof = "KS",
+  log = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{numeric vector}
@@ -21,6 +22,11 @@ lower bounds for each of the five parameters.}
 \code{fitdistrplus::mledist} or corresponding function based
 upon the \code{method} argument, but ultimately passed to
 \code{stats::optim()}.}
+
+\item{gof}{character string compatible with the relevant
+downstream function goodness of fit method,, currently
+the default \code{"KS"} uses the Kolmogorov-Smirnov distance.
+See \code{fitdistrplus::mgedist()} for more details.}
 
 \item{verbose}{logical indicating whether to print verbose output.}
 

@@ -59,11 +59,13 @@ salsaAppServer <- function
       ## update the numeric ranges allowed
       count_vector_l <- get_salsa_steps(numi_per_cell_df[,2],
          include_vector=TRUE);
+      default_range <- jamba::noiseFloor(range(count_vector_l$count_vector),
+         minimum=4);
       updateSliderInput(session,
          "cell_count_slider",
          min=min(count_vector_l$count_vector),
          max=max(count_vector_l$count_vector),
-         value=range(count_vector_l$count_vector));
+         value=default_range);
 
       return(numi_per_cell_df);
    });
@@ -80,6 +82,7 @@ salsaAppServer <- function
    outputOptions(output,
       "cell_file_uploaded",
       suspendWhenHidden=FALSE);
+
    # button "calc_cell_params"
    get_cell_salsa_table <- reactive({
       ## only the button causes calculations
@@ -88,6 +91,7 @@ salsaAppServer <- function
       ## Isolate other inputs so they do not cause immediate reaction
       cell_count_slider <- isolate(input$cell_count_slider);
       numi_per_cell_df <- isolate(numi_per_cell());
+      cell_fr_wei_method <- isolate(input$cell_fr_wei_method);
       usecounts <- numi_per_cell_df[,2];
 
       #
@@ -96,7 +100,19 @@ salsaAppServer <- function
       count_vector <- count_vector_l$count_vector;
       count_vector <- count_vector[count_vector >= min(cell_count_slider)
          & count_vector <= max(cell_count_slider)];
+      # Currently restrict lower bound to 2
+      count_vector <- count_vector[count_vector >= 2];
 
+      ## Optionally print verbose output
+      verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
+      if (verbose) {
+         printDebug("get_cell_salsa_table(): ",
+            "Starting do_salsa_steps()");
+         printDebug("get_cell_salsa_table(): ",
+            "length(usecounts):", length(usecounts));
+         printDebug("get_cell_salsa_table(): ",
+            "range(count_vector):", range(count_vector));
+      }
       ## Wrap the workflow in a progress bar
       withProgress(
          message="Calculating fit parameters",
@@ -105,15 +121,28 @@ salsaAppServer <- function
             salsa_steps <- do_salsa_steps(x=usecounts,
                count_vector=count_vector,
                do_shiny_progress=TRUE,
-               verbose=FALSE);
+               fr_wei_method=cell_fr_wei_method,
+               verbose=verbose);
             salsa_table <- get_salsa_table(salsa_steps);
          }
       );
       return(salsa_table);
    });
+
    output$cell_output_left <- renderPlotly({
       salsa_table <- get_cell_salsa_table();
+      ## Handle event data
+      eventdata_r <- event_data("plotly_click", source="cell_right");
+      eventdata_l <- event_data("plotly_click", source="cell_left");
+      if ("data.frame" %in% class(eventdata_r)) {
+         print(head(eventdata_r));
+      }
       ## Plot the results
+      if (input$log_cell_x) {
+         xaxis_type <- "log";
+      } else {
+         xaxis_type <- "linear";
+      }
       fr_colnames <- c("shape", "scale");
       fr_plot_list <- lapply(nameVector(fr_colnames), function(i){
          plot_ly(salsa_table,
@@ -121,8 +150,10 @@ salsaAppServer <- function
             y=as.formula(paste0("~",i)),
             name=i,
             type="scatter",
+            source="cell_left",
             mode="markers+lines") %>%
          layout(
+            showlegend=FALSE,
             yaxis=list(title=i),
             spikedistance=10,
             hovermode="x",
@@ -134,8 +165,19 @@ salsaAppServer <- function
                spikethickness=2,
                showspikes=TRUE,
                spikesides=TRUE,
-               spikes="across"
+               spikes="across",
+               type=xaxis_type
             )
+         ) %>%
+         add_annotations(
+            text=~i,
+            x=0.5,
+            y=1,
+            yref="paper",
+            xref="paper",
+            yanchor="top",
+            xanchor="middle",
+            showarrow=FALSE
          ) %>%
          config(displaylogo=FALSE)
       });
@@ -147,6 +189,11 @@ salsaAppServer <- function
    output$cell_output_right <- renderPlotly({
       salsa_table <- get_cell_salsa_table();
       ## Plot the results
+      if (input$log_cell_x) {
+         xaxis_type <- "log";
+      } else {
+         xaxis_type <- "linear";
+      }
       fr_wei_colnames <- c("fr_shape", "fr_scale",
          "fr_weight",
          "wei_shape", "wei_scale");
@@ -159,8 +206,10 @@ salsaAppServer <- function
             name=i,
             legendgroup=legendgroup,
             type="scatter",
+            source="cell_right",
             mode="markers+lines") %>%
          layout(
+            showlegend=FALSE,
             spikedistance=10,
             hovermode="x",
             yaxis=list(title=i),
@@ -172,8 +221,19 @@ salsaAppServer <- function
                spikethickness=2,
                showspikes=TRUE,
                spikesides=TRUE,
-               spikes="across"
+               spikes="across",
+               type=xaxis_type
             )
+         ) %>%
+         add_annotations(
+            text=~i,
+            x=0.5,
+            y=1,
+            yref="paper",
+            xref="paper",
+            yanchor="top",
+            xanchor="middle",
+            showarrow=FALSE
          )
       });
       sp_fr <- subplot(fr_wei_plot_list,

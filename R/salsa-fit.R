@@ -18,8 +18,6 @@
 #' @param wei_scale the Weibull scale
 #' @param fr_weight numeric value from 0 to 1, the Frechet weight, where
 #'    the corresponding Weibull weight is `(1 - fr_weight)`.
-#' @param log logical passed to `actuar::dinvweibull`, if `TRUE`
-#'    probabilities/densities are returned as `log(p)`.
 #'
 #' @export
 dfr_wei <- function
@@ -28,8 +26,8 @@ dfr_wei <- function
  fr_scale=100,
  wei_shape=2,
  wei_scale=1000,
- fr_weight=0.5,
- log=FALSE)
+ fr_weight=0.5
+)
 {
    ## Purpose is to model two distributions given proper parameters
    ##
@@ -53,11 +51,13 @@ dfr_wei <- function
    if (!suppressPackageStartupMessages(require(jamba))) {
       stop("The jamba package is required.");
    }
+   log <- FALSE;
    fr_weight <- jamba::noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
-   verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
+   #verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
+   verbose <- FALSE;
    if (verbose) {
-      printDebug("d_fr_wei(): ",
+      printDebug("dfr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
          "\nfr_scale:", format(fr_scale, digits=2),
          "\nfr_weight:", format(fr_weight, digits=2),
@@ -91,17 +91,17 @@ fr_shape=2,
 fr_scale=100,
 wei_shape=2,
 wei_scale=1000,
-fr_weight=0.5,
-log=FALSE)
+fr_weight=0.5)
 {
    if (!suppressPackageStartupMessages(require(actuar))) {
       stop("The actuar package is required.");
    }
+   log <- FALSE;
    fr_weight <- jamba::noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
    verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
    if (verbose) {
-      printDebug("q_fr_wei(): ",
+      printDebug("qfr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
          "\nfr_scale:", format(fr_scale, digits=2),
          "\nfr_weight:", format(fr_weight, digits=2),
@@ -135,17 +135,18 @@ fr_shape=2,
 fr_scale=100,
 wei_shape=2,
 wei_scale=1000,
-fr_weight=0.5,
-log=FALSE)
+fr_weight=0.5)
 {
    if (!suppressPackageStartupMessages(require(actuar))) {
       stop("The actuar package is required.");
    }
+   log <- FALSE;
    fr_weight <- noiseFloor(fr_weight, minimum=0, ceiling=1);
    wei_weight <- 1 - fr_weight;
-   verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
+   #verbose <- length(getOption("verbose")) > 0 && getOption("verbose");
+   verbose <- FALSE;
    if (verbose) {
-      printDebug("q_fr_wei(): ",
+      printDebug("pfr_wei(): ",
          "\nfr_shape:", format(fr_shape, digits=2),
          "\nfr_scale:", format(fr_scale, digits=2),
          "\nfr_weight:", format(fr_weight, digits=2),
@@ -218,16 +219,16 @@ log=FALSE)
 #' @export
 params_fr_wei <- function
 (param_fr_wei=NULL,
-   ...)
+ ...)
 {
    ## Define a matrix with start, low, and high parameter values
    ## for Frechet-Weibull distribution fit parameters
-   lowerFrWei <- c(fr_weight=0.01,
+   lowerFrWei <- c(fr_weight=0.001,
       fr_shape=1.5,
       fr_scale=1,
       wei_shape=1.5,
       wei_scale=1);
-   upperFrWei <- c(fr_weight=0.99,
+   upperFrWei <- c(fr_weight=0.999,
       fr_shape=1000,
       fr_scale=10000,
       wei_shape=1000,
@@ -290,6 +291,10 @@ params_fr_wei <- function
 #'    `fitdistrplus::mledist` or corresponding function based
 #'    upon the `method` argument, but ultimately passed to
 #'    `stats::optim()`.
+#' @param gof character string compatible with the relevant
+#'    downstream function goodness of fit method,, currently
+#'    the default `"KS"` uses the Kolmogorov-Smirnov distance.
+#'    See `fitdistrplus::mgedist()` for more details.
 #' @param verbose logical indicating whether to print verbose output.
 #' @param ... additional arguments are passed to
 #'    `fitdistrplus::fitdist()`.
@@ -306,13 +311,15 @@ params_fr_wei <- function
 fitdist_fr_wei <- function
 (x,
  param_fr_wei=params_fr_wei(),
- method="mle",
+ method=c("mle", "mme", "qme", "mge"),
  optim.method="Nelder-Mead",
+ gof="KS",
  log=FALSE,
  verbose=FALSE,
  ...)
 {
    ## Purpose is to provide a simple wrapper for fitdist()
+   method <- match.arg(method);
    if (verbose) {
       jamba::printDebug("fitdist_fr_wei(): ",
          "method:", method);
@@ -323,15 +330,28 @@ fitdist_fr_wei <- function
       print(param_fr_wei);
    }
    fit_fr_wei <- tryCatch({
-      fitdistrplus::fitdist(
-         data=x,
-         distr="fr_wei",
-         method=method,
-         start=as.list(param_fr_wei["start",]),
-         lower=param_fr_wei["lower",],
-         upper=param_fr_wei["upper",],
-         optim.method=optim.method,
-         ...);
+      if ("mge" %in% method) {
+         fitdistrplus::fitdist(
+            data=x,
+            distr="fr_wei",
+            method=method,
+            start=as.list(param_fr_wei["start",]),
+            lower=param_fr_wei["lower",],
+            upper=param_fr_wei["upper",],
+            optim.method=optim.method,
+            gof=gof,
+            ...);
+      } else {
+         fitdistrplus::fitdist(
+            data=x,
+            distr="fr_wei",
+            method=method,
+            start=as.list(param_fr_wei["start",]),
+            lower=param_fr_wei["lower",],
+            upper=param_fr_wei["upper",],
+            optim.method=optim.method,
+            ...);
+      }
    }, error=function(e){
       if (verbose) {
          jamba::printDebug("fitdist_fr_wei(): ",
@@ -416,7 +436,7 @@ fitdist_fr <- function
    fit_fr <- tryCatch({
       fitdistrplus::fitdist(x,
          distr="invweibull",
-         method=method,
+         method="mme",
          order=order,
          memp=memp2);
    }, error=function(e) {
@@ -623,6 +643,9 @@ get_salsa_steps <- function
 #'    which defines the parameter upper and lower limits, and
 #'    start values for each parameter. If `NULL` then the
 #'    default values from `params_fr_wei()` are used.
+#' @param fr_method,fr_wei_method character string with valid
+#'    `method` argument for `fitdist_fr()` and `fitdist_fr_wei()`
+#'    respectively.
 #' @param do_shiny_progress logical indicating whether to
 #'    send progress updates to a running shiny app, using
 #'    the `shiny::withProgress()` and `shiny::incProgress()`
@@ -669,11 +692,14 @@ do_salsa_steps <- function
  cache_fr=cache_filesystem("./cache_fr"),
  cache_fr_wei=cache_filesystem("./cache_fr_wei"),
  param_fr_wei=NULL,
+ fr_method="mme",
+ fr_wei_method=c("mle","mge"),
  do_shiny_progress=FALSE,
  verbose=FALSE,
  ...)
 {
    ## Set up memoise for caching
+   fr_wei_method <- match.arg(fr_wei_method);
    if (length(cache_fr) == 0) {
       fitdist_fr_m <- fitdist_fr;
    } else {
@@ -761,6 +787,7 @@ do_salsa_steps <- function
          }
          fit_fr <- tryCatch({
             fitdist_fr_m(usecounts,
+               method=fr_method,
                ...);
          }, error=function(e){
             if (verbose) {
@@ -796,6 +823,7 @@ do_salsa_steps <- function
             }
             fit_fr_wei <- tryCatch({
                fitdist_fr_wei_m(x=usecounts,
+                  method=fr_wei_method,
                   param_fr_wei=param_fr_wei);
             }, error=function(e){
                if (verbose) {
